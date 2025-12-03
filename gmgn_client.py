@@ -129,21 +129,40 @@ class GMGNClient:
             # Handle brotli compression if needed
             try:
                 return response.json()
-            except (ValueError, json.JSONDecodeError):
+            except (ValueError, json.JSONDecodeError) as json_err:
                 # Try manual brotli decompression
+                # Sometimes responses are Brotli-compressed even if Content-Encoding header is missing
                 try:
                     import brotli
-                    if response.headers.get('Content-Encoding') == 'br':
-                        decompressed = brotli.decompress(response.content)
-                        return json.loads(decompressed.decode('utf-8'))
-                except:
+                    # Try decompressing regardless of Content-Encoding header
+                    # Check if content looks like Brotli (starts with specific magic bytes)
+                    content = response.content
+                    if content and len(content) > 0:
+                        # Try Brotli decompression
+                        try:
+                            decompressed = brotli.decompress(content)
+                            decoded = decompressed.decode('utf-8')
+                            return json.loads(decoded)
+                        except (brotli.error, UnicodeDecodeError, json.JSONDecodeError):
+                            # If Brotli fails, check Content-Encoding header as fallback
+                            if response.headers.get('Content-Encoding') == 'br':
+                                # Already tried above, so this is a fallback
+                                pass
+                except ImportError:
+                    # brotli library not installed
+                    pass
+                except Exception as decompress_err:
+                    # Other decompression errors
                     pass
                 
-                # Response is not JSON, return text
+                # Response is not JSON, return text with better error message
+                content_preview = response.text[:500] if hasattr(response, 'text') and response.text else str(response.content[:500])
+                encoding = response.headers.get('Content-Encoding', 'unknown')
                 return {
-                    "error": "Response is not JSON",
+                    "error": f"Failed to parse JSON response: {str(json_err)}. Content-Encoding: {encoding}",
                     "status_code": response.status_code,
-                    "response_text": response.text[:1000] if hasattr(response, 'text') else str(response.content[:1000])
+                    "response_text": content_preview,
+                    "content_encoding": encoding
                 }
         except requests.exceptions.HTTPError as e:
             return {
@@ -1028,21 +1047,40 @@ class GMGNClient:
             # Handle brotli compression if needed
             try:
                 return response.json()
-            except (ValueError, json.JSONDecodeError):
+            except (ValueError, json.JSONDecodeError) as json_err:
                 # Try manual brotli decompression
+                # Sometimes responses are Brotli-compressed even if Content-Encoding header is missing
                 try:
                     import brotli
-                    if response.headers.get('Content-Encoding') == 'br':
-                        decompressed = brotli.decompress(response.content)
-                        return json.loads(decompressed.decode('utf-8'))
-                except:
+                    # Try decompressing regardless of Content-Encoding header
+                    # Check if content looks like Brotli (starts with specific magic bytes)
+                    content = response.content
+                    if content and len(content) > 0:
+                        # Try Brotli decompression
+                        try:
+                            decompressed = brotli.decompress(content)
+                            decoded = decompressed.decode('utf-8')
+                            return json.loads(decoded)
+                        except (brotli.error, UnicodeDecodeError, json.JSONDecodeError):
+                            # If Brotli fails, check Content-Encoding header as fallback
+                            if response.headers.get('Content-Encoding') == 'br':
+                                # Already tried above, so this is a fallback
+                                pass
+                except ImportError:
+                    # brotli library not installed
+                    pass
+                except Exception as decompress_err:
+                    # Other decompression errors
                     pass
                 
-                # Response is not JSON, return text
+                # Response is not JSON, return text with better error message
+                content_preview = response.text[:500] if hasattr(response, 'text') and response.text else str(response.content[:500])
+                encoding = response.headers.get('Content-Encoding', 'unknown')
                 return {
-                    "error": "Response is not JSON",
+                    "error": f"Failed to parse JSON response: {str(json_err)}. Content-Encoding: {encoding}",
                     "status_code": response.status_code,
-                    "response_text": response.text[:1000] if hasattr(response, 'text') else str(response.content[:1000])
+                    "response_text": content_preview,
+                    "content_encoding": encoding
                 }
         except requests.exceptions.HTTPError as e:
             return {
