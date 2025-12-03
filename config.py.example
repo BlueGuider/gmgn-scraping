@@ -1,0 +1,31 @@
+# GMGN Bot Configuration
+# Copy this file to config.py and fill in your tokens
+
+# Bot Type: "discord" or "telegram"
+BOT_TYPE = "discord"
+
+# Discord Bot Token (get from https://discord.com/developers/applications)
+DISCORD_TOKEN = "YOUR_DISCORD_BOT_TOKEN_HERE"
+
+# Telegram Bot Token (get from @BotFather on Telegram)
+TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+
+# GMGN Cookies (required to avoid 403 errors)
+# Get cookies from browser: F12 > Network > Request Headers > Cookie
+# See get_cookies_guide.md for detailed instructions
+# Format: Dictionary of cookie name: value pairs
+COOKIES = {
+    # Example:
+    # '_ga': 'GA1.1.1733557038.1754106388',
+    # 'sid': 'gmgn%7Cd100ef21e6c5fd9e635a492164310750',
+    # 'cf_clearance': 'your_cf_clearance_value',
+    # '__cf_bm': 'your_cf_bm_value',
+    # Add all cookies from browser here
+}
+
+# Device IDs (optional - will be auto-generated if not provided)
+# Using the same device_id/fp_did from browser session works better
+# Get these from browser DevTools > Network > Request > Query String Parameters
+DEVICE_ID = None  # e.g., 'f9166d17-1e90-4995-99b4-ee028bbd5675'
+FP_DID = None  # e.g., 'fa361a492c820f5a56b636b00743ed54'
+
